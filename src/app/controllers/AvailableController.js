@@ -6,6 +6,7 @@ import {
   setSeconds,
   format,
   isAfter,
+  parseISO,
 } from 'date-fns';
 import { Op } from 'sequelize';
 import Appointment from '../models/Appointment';
@@ -15,12 +16,12 @@ class AvailableController {
     const { date } = req.query;
 
     if (!date) {
-      return res.status(401).json({ error: 'Invalid date' });
+      return res.status(400).json({ error: 'Invalid date' });
     }
 
-    const searchDate = Number(date);
+    const searchDate = parseISO(date);
 
-    const appointments = await Appointment.finddAll({
+    const appointments = await Appointment.findAll({
       where: {
         provider_id: req.params.providerId,
         canceled_at: null,
@@ -35,6 +36,7 @@ class AvailableController {
       '09:00',
       '10:00',
       '11:00',
+      '12:00',
       '13:00',
       '14:00',
       '15:00',
@@ -42,9 +44,10 @@ class AvailableController {
       '17:00',
       '18:00',
       '19:00',
+      '20:00',
     ];
 
-    const available = schedule.map(time => {
+    const avaiable = schedule.map(time => {
       const [hour, minute] = time.split(':');
       const value = setSeconds(
         setMinutes(setHours(searchDate, hour), minute),
@@ -60,7 +63,7 @@ class AvailableController {
       };
     });
 
-    return res.json(available);
+    return res.json(avaiable);
   }
 }
 
